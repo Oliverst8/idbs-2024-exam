@@ -11,6 +11,7 @@
 .idea/**/usage.statistics.xml
 .idea/**/dictionaries
 .idea/**/shelf
+**/.idea/**
 
 # AWS User-specific
 .idea/**/aws.xml
@@ -224,7 +225,6 @@ fabric.properties
 ### Intellij+iml Patch ###
 # Reason: https://github.com/joeblau/gitignore.io/issues/186#issuecomment-249601023
 
-*.iml
 modules.xml
 .idea/misc.xml
 *.ipr
