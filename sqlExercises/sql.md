@@ -268,32 +268,101 @@ FROM (
 ## Q1 - The empire ‘Great Britain’ consists of 4 countries. How many countries does the empire ‘Iberian’ consist of?
 
 ### Part 1
-
+```sql
+select count(*)
+from empires E
+where E.Empire = 'Great Britain';
+```
 
 ### Part 2
+```sql
+select count(*)
+from empires E
+where E.Empire = 'Iberian';
+```
 
 ## Q2 - There are 4 countries that are present on more than one continent. How many of these countries are partially in Asia?
 
 ### Part 1
-
+```sql
+select count(*)
+from (
+	select CC.CountryCode
+	from countries_continents CC 
+	group by CC.CountryCode
+	having count(*) > 1
+) X;
+```
 
 ### Part 2
+```sql
+select count(*)
+from (
+	select CC.CountryCode
+	from countries_continents CC 
+		join countries_continents C2 on CC.CountryCode = C2.CountryCode
+	where C2.Continent = 'Asia'
+	group by CC.CountryCode
+	having count(*) > 1
+) X;
+```
 
 ## Q3 - In the countries of North America that have more than 80 million inhabitants, there are a total of 111,946,176 people who speak Spanish, according to the statistics in the database. How many people who speak Spanish exist in the countries of Europe that have more than 50 million inhabitants?
 
 ### Part 1
+```sql
+select count(*)
+from countries_continents
+where percentage < 100 and continent = 'Asia';
+```
 
 
 ### Part 2
+```sql
+select count(*)
+from (
+	select countrycode
+	from countries_continents
+	where continent = 'Asia'
+	intersect
+	select countrycode
+	from countries_continents
+	where continent <> 'Asia'
+) X;
+```
 
 ## Q4 - According to the database, two languages are spoken in all countries of ‘Benelux’. How many languages are spoken in all countries of ‘Danish Empire’?
 
 *Note: This is a division query; points will only be awarded if division is attempted.*
 
 ### Part 1
+```sql
+select sum(SpanishSpeaking)
+from (
+	select CO.Code, CO.Population * CL.Percentage / 100.0 as SpanishSpeaking
+	from countries CO
+		join countries_continents CC on CO.Code = CC.CountryCode
+		join countries_languages CL on CO.Code = CL.CountryCode
+	where CO.Population > 80000000
+		and CC.Continent = 'North America'
+		and CL.Language = 'Spanish'
+) X;
+```
 
 
 ### Part 2
+```sql
+select sum(SpanishSpeaking)
+from (
+	select CO.Code, CO.Population * CL.Percentage / 100.0 as SpanishSpeaking
+	from countries CO
+		join countries_continents CC on CO.Code = CC.CountryCode
+		join countries_languages CL on CO.Code = CL.CountryCode
+	where CO.Population > 50000000
+		and CC.Continent = 'Europe'
+		and CL.Language = 'Spanish'
+) X;
+```
 
 
 # Homework 4
