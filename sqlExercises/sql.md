@@ -1,13 +1,13 @@
 # Homework 1
-## Q1
-The person relation contains 284 entries with a registered death date after ‘2010-02-
-01’. How many entries do not have a registered death date?
+## Q1 - 1The person relation contains 284 entries with a registered death date after ‘2010-02- 01’. How many entries do not have a registered death date?
+
 ### Part 1
 ```sql
 SELECT count(*)
 FROM person
 WHERE deathdate > '2010-02-01';
 ```
+
 ### Part 2
 ```sql
 SELECT count(*)
@@ -15,11 +15,8 @@ FROM person
 WHERE deathdate IS NULL;
 ```
 
-## Q2
-In the database, there are 46 movies in the French language for which the average
-height of all the people involved is greater than 185 centimeters (ignoring people with
-unregistered height). What is the number of movies in the Portuguese language for
-which the average height of all people involved is greater than 175 centimeters?
+## Q2 - In the database, there are 46 movies in the French language for which the average height of all the people involved is greater than 185 centimeters (ignoring people with unregistered height). What is the number of movies in the Portuguese language for which the average height of all people involved is greater than 175 centimeters?
+
 ### Part 1
 ```sql
 SELECT COUNT(*) 
@@ -48,12 +45,8 @@ FROM (
 ) X;
 ```
 
-## Q3
-The movie genre relation does not have a primary key, which can lead to a movie
-having more than one entry with the same genre. As a result, there are 14 movies
-in movie genre that have the genre ‘Action’ assigned to them more than once. How
-many movies in movie genre have the genre ‘Thriller’ assigned to them more than
-once?
+## Q3 - The movie genre relation does not have a primary key, which can lead to a movie having more than one entry with the same genre. As a result, there are 14 movies in movie genre that have the genre ‘Action’ assigned to them more than once. How many movies in movie genre have the genre ‘Thriller’ assigned to them more than once?
+
 ### Part 1
 ```sql
 SELECT COUNT(*)
@@ -78,10 +71,7 @@ FROM (
 ) X;
 ```
 
-## Q4
-According to the information in the database, 52 different people acted in movies
-directed by ‘Ingmar Bergman’. How many different people acted in movies directed
-by ‘Akira Kurosawa’ ?
+## Q4 - According to the information in the database, 52 different people acted in movies directed by ‘Ingmar Bergman’. How many different people acted in movies directed by ‘Akira Kurosawa’?
 ### Part 1
 ```sql
 SELECT COUNT(DISTINCT I1.personId)
@@ -104,13 +94,10 @@ WHERE I1.role = 'actor'
   AND P.name = 'Akira Kurosawa';
 ```
 
+## Q5 - Of all the movies produced in 2007, there are 15 that have two directors involved in them. How many movies produced in 2010 have two directors involved in them?
 
-## Q5
-Of all the movies produced in 2007, there are 15 that have two directors involved
-in them. How many movies produced in 2010 have two directors involved in them?
 ### Part 1
 ```sql
-
 SELECT COUNT(*) 
 FROM movie M
 WHERE M.year = 2007
@@ -137,10 +124,8 @@ WHERE M.year = 2010
   );
 ```
 
-## Q6
-There are 406 unique pairs of actors who have appeared together in exactly 10 movies
-released between 2000 and 2010. How many unique pairs of actors have appeared
-together in exactly 20 movies released between 2000 and 2010?
+## Q6 - There are 406 unique pairs of actors who have appeared together in exactly 10 movies released between 2000 and 2010. How many unique pairs of actors have appeared together in exactly 20 movies released between 2000 and 2010?
+
 ### Part 1
 ```sql
 SELECT COUNT(*)
@@ -169,12 +154,8 @@ FROM (
 ) X;
 ```
 
-## Q7
-Of all the movies produced between 2000 and 2002, there are 782 that have entries
-registered in involved for all roles defined in the roles relation. How many movies
-produced between 2002 and 2004 have entries registered in involved for all roles
-defined in the roles relation? Note: This is a relational division query that must
-work for any instance; Do not use any ‘magic numbers’.
+## Q7 - Of all the movies produced between 2000 and 2002, there are 782 that have entries registered in involved for all roles defined in the roles relation. How many movies produced between 2002 and 2004 have entries registered in involved for all roles defined in the roles relation? Note: This is a relational division query that must work for any instance; Do not use any ‘magic numbers’.
+
 ### Part 1
 ```sql
 SELECT COUNT(*)
@@ -207,12 +188,8 @@ FROM (
 ) X;
 ```
 
+## Q8 - The number of people who have played a role in movies of all genres in the category ‘Newsworthy’ is 156. How many people have played a role in movies of all genres in the category ‘Newsworthy’ but have not played any role in movies that cover all genres in the category ‘Popular’?
 
-## Q8
-The number of people who have played a role in movies of all genres in the category
-‘Newsworthy’ is 156. How many people have played a role in movies of all genres
-in the category ‘Newsworthy’ but have not played any role in movies that cover all
-genres in the category ‘Popular’ ?
 ### Part 1
 ```sql
 SELECT COUNT(*)
@@ -528,4 +505,43 @@ HAVING COUNT(alg.GenreId) = (
 );
 ```
 
+
+
+### Part 2
+
+
+# Exam 2022
+
+## a) - The chiffon fabric consists of 9 different elements. How many different elements does the cashmere fabric consist of?
+
+### Part 1
+
+
+### Part 2
+
+## b) - There are 84 countries that have more than one designer. How many countries have more than two designers?
+
+### Part 1
+
+
+### Part 2
+
+## c) - In the database, 12609 garments have a price that is higher than the average garmentprice. How many garments have a price that is lower than the average garment price?
+
+### Part 1
+
+
+### Part 2
+
+## d) - How many garments with missing price values have a type of importance equal to six?
+
+### Part 1
+
+## e) - How many main designers have designed garments in all categories that exist in the database? Note that in this query you should only consider the main designers, not co-designers.
+
+### Part 1
+
+## f) - The designer with d ID of 200 has collaborated, either as the main designer or as the co-designer, with 11 other designers from 7 different countries. How many designers have collaborated with other designers from 14 different countries?
+
+### Part 1
 
