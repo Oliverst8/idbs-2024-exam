@@ -1,5 +1,7 @@
 # Homework 1
 ## Q1
+The person relation contains 284 entries with a registered death date after ‘2010-02-
+01’. How many entries do not have a registered death date?
 ### Part 1
 ```sql
 SELECT count(*)
@@ -14,6 +16,10 @@ WHERE deathdate IS NULL;
 ```
 
 ## Q2
+In the database, there are 46 movies in the French language for which the average
+height of all the people involved is greater than 185 centimeters (ignoring people with
+unregistered height). What is the number of movies in the Portuguese language for
+which the average height of all people involved is greater than 175 centimeters?
 ### Part 1
 ```sql
 SELECT COUNT(*) 
@@ -43,6 +49,11 @@ FROM (
 ```
 
 ## Q3
+The movie genre relation does not have a primary key, which can lead to a movie
+having more than one entry with the same genre. As a result, there are 14 movies
+in movie genre that have the genre ‘Action’ assigned to them more than once. How
+many movies in movie genre have the genre ‘Thriller’ assigned to them more than
+once?
 ### Part 1
 ```sql
 SELECT COUNT(*)
@@ -66,3 +77,4 @@ FROM (
     HAVING COUNT(*) > 1
 ) X;
 ```
+
