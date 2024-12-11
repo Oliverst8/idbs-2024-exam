@@ -278,14 +278,28 @@ FROM (
 ## Q1 - In the database, 353 songs have a duration of at least 10 minutes. What is the average duration of songs, in minutes, that have a duration between 5 and 25 minutes, inclusive? Round the number of minutes (ROUND(...)).
 
 ### Part 1
-
-
+```sql
+SELECT COUNT(*)
+  FROM Songs
+ WHERE Duration >= interval '10 minute';
+```
 ### Part 2
 
+```sql
+SELECT ROUND(extract(EPOCH FROM AVG(Duration)) / 60) AS AverageDurationMinutes
+FROM Songs
+WHERE Duration >= interval '5 minute'
+   AND Duration <= interval '25 minute';
+```
 
 ## Q2 - What is the total duration in minutes of all explicit songs in the database? Round the number of minutes (ROUND(...)).
 
 ### Part 1
+```sql
+SELECT ROUND(extract(EPOCH FROM SUM(Duration))/60) AS Duration_in_hours
+  FROM Songs
+ WHERE IsExplicit = 1;
+```
 
 
 ## Q3 - The database contains just 5 songs released in 1953. What is the average number of songs released in a year? Round the number of songs (ROUND(...)).
@@ -293,9 +307,30 @@ FROM (
 *Note: This is a very simple query. Try also to answer which year had the largest number of songs. Observe how much harder this query is!*
 
 ### Part 1
+```sql
+SELECT ROUND(AVG(x.cnt))
+  FROM (
+    SELECT COUNT(*) as cnt
+      FROM Songs
+     GROUP BY extract(YEAR FROM Releasedate)
+  ) x;
+```
 
 
 ### Part 2
+```sql
+SELECT extract(YEAR FROM Releasedate) as yr
+  FROM Songs
+ GROUP BY extract(YEAR FROM Releasedate)
+HAVING COUNT(*) = (
+    SELECT MAX(x.cnt)
+      FROM (
+        SELECT extract(YEAR FROM Releasedate) as yr, COUNT(*) as cnt
+          FROM Songs
+         GROUP BY extract(YEAR FROM Releasedate)
+      ) x
+    );
+```
 
 
 ## Q4 - The database contains multiple albums by the artist Queen. Each album has a different average song duration, with the maximum average song duration of an album by Queen being 354 seconds. What is the maximum average song duration (in seconds) of an album by Miles Davis?
@@ -303,30 +338,83 @@ FROM (
 *Note: The output of the maximum average song duration is rounded ROUND(...)*
 
 ### Part 1
-
+```sql
+SELECT ROUND(extract(EPOCH FROM MAX(x.sd)))
+  FROM (
+    SELECT als.AlbumId, AVG(s.duration) sd
+      FROM Artists a
+      JOIN Songs s ON s.ArtistId = a.ArtistId
+      JOIN AlbumSongs als ON als.SongId = s.SongId
+     WHERE a.Artist = 'Queen'
+     GROUP BY als.AlbumId
+  ) x;
+```
 
 ### Part 2
-
+```sql
+SELECT ROUND(extract(EPOCH FROM MAX(x.sd)))
+  FROM (
+    SELECT als.AlbumId, AVG(s.duration) sd
+      FROM Artists a
+      JOIN Songs s ON s.ArtistId = a.ArtistId
+      JOIN AlbumSongs als ON als.SongId = s.SongId
+     WHERE a.Artist = 'Miles Davis'
+     GROUP BY als.AlbumId
+  ) x;
+```
 
 ## Q5 - There are 938 song titles that have been used for at least 2 songs, making up a total of 2072 songs with those titles. How many songs have a title that has been used for at least 4 songs?
 
 ### Part 1
+```sql
+SELECT SUM(C.cnt) 
+  FROM (
+  SELECT COUNT(*) as cnt
+    FROM Songs 
+   GROUP BY title 
+  HAVING COUNT(*) > 3
+) C;
 
-
-### Part 2
-
+```
 
 ## Q6 - How many songs have been released after 2010 or belong to an album released in January.
 
 ### Part 1
+```sql
+SELECT COUNT(*)
+  FROM (
+    SELECT SongId
+      FROM Songs s
+     WHERE extract(year FROM s.Releasedate) > 2010
+    UNION
+    SELECT SongId
+      FROM Albums al
+      JOIN AlbumSongs als ON al.AlbumId = als.AlbumId
+     WHERE extract(month FROM al.albumreleasedate) = 1
+);
+```
 
 
 ## Q7 - There are 1147 Albums with more than 1 song and none of them are Explicit. How many Albums consists of more than 1 song with all songs being Explicit?
 
 ### Part 1
+```sql
+SELECT COUNT(*)
+FROM (
+  SELECT COUNT(*)
+    FROM AlbumSongs als
+  GROUP BY als.AlbumId
+  HAVING COUNT(als.SongId) = (
+      SELECT COUNT(*)
+        FROM AlbumSongs als2
+        JOIN Songs s ON als2.SongId = s.SongId
+      WHERE als2.AlbumId = als.AlbumId
+        AND s.isExplicit = 1
+  )  AND COUNT(*) > 1
+);
+```
 
 
-### Part 2
 
 
 ## Q8 - The highest number of genres covered within an Album is 5. In the database, there is only one Album that has this amount of genres. What is the name of this Album?
@@ -334,6 +422,57 @@ FROM (
 *Note: Write your query to be capable of finding all albums that have the highest number of genres. (No hardcoded values)*
 
 ### Part 1
+```sql
+SELECT al.Album
+  FROM Albums al
+  JOIN AlbumGenres alg ON al.AlbumId = alg.AlbumId
+ GROUP BY al.AlbumId, al.Album
+HAVING COUNT(alg.GenreId) = (
+    SELECT MAX(cnt) FROM (
+        SELECT COUNT(*) as cnt
+        FROM AlbumGenres
+        GROUP BY AlbumId
+    )
+);
+```
+
 
 
 ### Part 2
+
+
+# Exam 2022
+
+## a) - The chiffon fabric consists of 9 different elements. How many different elements does the cashmere fabric consist of?
+
+### Part 1
+
+
+### Part 2
+
+## b) - There are 84 countries that have more than one designer. How many countries have more than two designers?
+
+### Part 1
+
+
+### Part 2
+
+## c) - In the database, 12609 garments have a price that is higher than the average garmentprice. How many garments have a price that is lower than the average garment price?
+
+### Part 1
+
+
+### Part 2
+
+## d) - How many garments with missing price values have a type of importance equal to six?
+
+### Part 1
+
+## e) - How many main designers have designed garments in all categories that exist in the database? Note that in this query you should only consider the main designers, not co-designers.
+
+### Part 1
+
+## f) - The designer with d ID of 200 has collaborated, either as the main designer or as the co-designer, with 11 other designers from 7 different countries. How many designers have collaborated with other designers from 14 different countries?
+
+### Part 1
+
