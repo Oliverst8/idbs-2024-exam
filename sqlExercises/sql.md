@@ -263,6 +263,39 @@ FROM (
 ) X;
 ```
 
+# Homework 2
+
+## Q1 - The empire ‘Great Britain’ consists of 4 countries. How many countries does the empire ‘Iberian’ consist of?
+
+### Part 1
+
+
+### Part 2
+
+## Q2 - There are 4 countries that are present on more than one continent. How many of these countries are partially in Asia?
+
+### Part 1
+
+
+### Part 2
+
+## Q3 - In the countries of North America that have more than 80 million inhabitants, there are a total of 111,946,176 people who speak Spanish, according to the statistics in the database. How many people who speak Spanish exist in the countries of Europe that have more than 50 million inhabitants?
+
+### Part 1
+
+
+### Part 2
+
+## Q4 - According to the database, two languages are spoken in all countries of ‘Benelux’. How many languages are spoken in all countries of ‘Danish Empire’?
+
+*Note: This is a division query; points will only be awarded if division is attempted.*
+
+### Part 1
+
+
+### Part 2
+
+
 # Homework 4
 
 ## Q1 - In the database, 353 songs have a duration of at least 10 minutes. What is the average duration of songs, in minutes, that have a duration between 5 and 25 minutes, inclusive? Round the number of minutes (ROUND(...)).
