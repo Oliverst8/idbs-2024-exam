@@ -327,3 +327,41 @@ FROM (
 
 
 ### Part 2
+
+
+# Exam 2022
+
+## a) - The chiffon fabric consists of 9 different elements. How many different elements does the cashmere fabric consist of?
+
+### Part 1
+
+
+### Part 2
+
+## b) - There are 84 countries that have more than one designer. How many countries have more than two designers?
+
+### Part 1
+
+
+### Part 2
+
+## c) - In the database, 12609 garments have a price that is higher than the average garmentprice. How many garments have a price that is lower than the average garment price?
+
+### Part 1
+
+
+### Part 2
+
+## d) - How many garments with missing price values have a type of importance equal to six?
+
+### Part 1
+
+## e) - How many main designers have designed garments in all categories that exist in the database? Note that in this query you should only consider the main designers, not co-designers.
+
+### Part 1
+
+## f) - The designer with d ID of 200 has collaborated, either as the main designer or as the co-designer, with 11 other designers from 7 different countries. How many designers have collaborated with other designers from 14 different countries?
+
+### Part 1
+
+
