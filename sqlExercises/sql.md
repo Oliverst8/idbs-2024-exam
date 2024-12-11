@@ -505,43 +505,105 @@ HAVING COUNT(alg.GenreId) = (
 );
 ```
 
-
-
-### Part 2
-
-
 # Exam 2022
 
 ## a) - The chiffon fabric consists of 9 different elements. How many different elements does the cashmere fabric consist of?
 
 ### Part 1
-
+```sql
+select count (E.e_element)
+from gFabrics F
+	join gElements E on E.f_id = F.f_id
+where F.f_name = 'chiffon';
+```
 
 ### Part 2
+```sql
+select count (E.e_element)
+from gFabrics F
+	join gElements E on E.f_id = F.f_id
+where F.f_name = 'cashmere'
+```
 
 ## b) - There are 84 countries that have more than one designer. How many countries have more than two designers?
 
 ### Part 1
+```sql
+select count(*)
+from (
+select D.d_country, count(*)
+from gDesigners D
+group by D.d_country
+having count(*) > 1
+) X;
+```
 
 
 ### Part 2
+```sql
+select count(*)
+from (
+select D.d_country, count(*)
+from gDesigners D
+group by D.d_country
+having count(*) > 2
+) X;
+```
 
 ## c) - In the database, 12609 garments have a price that is higher than the average garmentprice. How many garments have a price that is lower than the average garment price?
 
 ### Part 1
-
-
-### Part 2
+```sql
+select count(*)
+from gGarments G
+where G.g_Price < (select AVG(G.g_Price)
+					from gGarments G);
+```
 
 ## d) - How many garments with missing price values have a type of importance equal to six?
 
 ### Part 1
+```sql
+select count(*)
+from gGarments gg
+join gHasType gHT on gg.g_id = gHT.g_id 
+where gg.g_price IS NULL
+and gHT.ht_importance = 6
+```
 
 ## e) - How many main designers have designed garments in all categories that exist in the database? Note that in this query you should only consider the main designers, not co-designers.
 
 ### Part 1
+```sql
+select count(*)
+from (
+	select G.d_ID
+	from gGarments G
+		join gHasType HT on G.g_ID = HT.g_ID
+		join gTypes T on HT.t_ID = T.t_ID
+	group by G.d_ID
+	having count(distinct T.t_category) = (
+		select count(distinct T.t_category)
+		from gTypes T
+	)
+) X;
+```
 
 ## f) - The designer with d ID of 200 has collaborated, either as the main designer or as the co-designer, with 11 other designers from 7 different countries. How many designers have collaborated with other designers from 14 different countries?
 
 ### Part 1
+```sql
+select count(*)
+from (
+	select G.d_ID
+	from gGarments G
+		join gHasType HT on G.g_ID = HT.g_ID
+		join gTypes T on HT.t_ID = T.t_ID
+	group by G.d_ID
+	having count(distinct T.t_category) = (
+		select count(distinct T.t_category)
+		from gTypes T
+	)
+) X;
+```
 
