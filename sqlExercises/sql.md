@@ -79,6 +79,9 @@ FROM (
 ```
 
 ## Q4
+According to the information in the database, 52 different people acted in movies
+directed by ‘Ingmar Bergman’. How many different people acted in movies directed
+by ‘Akira Kurosawa’ ?
 ### Part 1
 ```sql
 SELECT COUNT(DISTINCT I1.personId)
@@ -103,6 +106,8 @@ WHERE I1.role = 'actor'
 
 
 ## Q5
+Of all the movies produced in 2007, there are 15 that have two directors involved
+in them. How many movies produced in 2010 have two directors involved in them?
 ### Part 1
 ```sql
 
@@ -133,6 +138,9 @@ WHERE M.year = 2010
 ```
 
 ## Q6
+There are 406 unique pairs of actors who have appeared together in exactly 10 movies
+released between 2000 and 2010. How many unique pairs of actors have appeared
+together in exactly 20 movies released between 2000 and 2010?
 ### Part 1
 ```sql
 SELECT COUNT(*)
@@ -162,6 +170,11 @@ FROM (
 ```
 
 ## Q7
+Of all the movies produced between 2000 and 2002, there are 782 that have entries
+registered in involved for all roles defined in the roles relation. How many movies
+produced between 2002 and 2004 have entries registered in involved for all roles
+defined in the roles relation? Note: This is a relational division query that must
+work for any instance; Do not use any ‘magic numbers’.
 ### Part 1
 ```sql
 SELECT COUNT(*)
@@ -196,6 +209,10 @@ FROM (
 
 
 ## Q8
+The number of people who have played a role in movies of all genres in the category
+‘Newsworthy’ is 156. How many people have played a role in movies of all genres
+in the category ‘Newsworthy’ but have not played any role in movies that cover all
+genres in the category ‘Popular’ ?
 ### Part 1
 ```sql
 SELECT COUNT(*)
