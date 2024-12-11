@@ -545,3 +545,40 @@ HAVING COUNT(alg.GenreId) = (
 
 ### Part 1
 
+
+
+# Exam 2023
+
+## 11 - Speedy Express has already shipped 245 orders. How many orders have been shipped by Federal Shipping? NOTE: Orders' ship_via attribute is a FOREIGN KEY to Shippers. Write your SQL Query here:
+
+### Part 1
+```sql
+
+```
+
+### Part 2
+```sql
+
+```
+
+## 13 - How many customers have received the highest discount? Write your SQL Query here:
+
+### Part 1
+```sql
+
+```
+
+## 15 - How many customers have no "Sales" in their contact title? Write your SQL Query here:
+
+### Part 1
+```sql
+
+```
+
+## 17 - How many customers have placed orders for products in all categories? Write your SQL query here: 
+
+### Part 1
+```sql
+
+```
+
