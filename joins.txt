@@ -1,0 +1,8 @@
+The reason we go for a nested loop join instead of the other two, is the fact that one of the relations has an index on it, which is a primary reason to choose such an index. For merge joins and hash joins to be efficient we need to fulfill other conditions: for merge joins both tables in join condition have to be sorted, and for hash join no indexes and only equi-joins. 
+
+Online information :
+When Does the Database Use Each Type?
+
+    Nested Loop: Good for small datasets or when one table has an index on the join key.
+    Merge Join: Efficient for pre-sorted data.
+    Hash Join: Ideal for larger datasets where no suitable indexes exist.
