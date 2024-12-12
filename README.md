@@ -1,1 +1,1 @@
-Be aware, that the tools provided are not guranteede to work 100%, users should doubel check the ouput and use critical thinking when using them
+Be aware, that the tools provided are not guaranteed to work 100%, users should double-check the output and use critical thinking when using them.
