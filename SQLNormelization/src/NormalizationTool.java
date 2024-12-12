@@ -100,12 +100,10 @@ public class NormalizationTool {
     static class FunctionalDependency {
         Set<String> lhs;
         Set<String> rhs;
-
         FunctionalDependency(Set<String> lhs, Set<String> rhs) {
             this.lhs = lhs;
             this.rhs = rhs;
         }
-
         @Override
         public String toString() {
             return lhs + " -> " + rhs;
@@ -133,9 +131,9 @@ public class NormalizationTool {
     static Set<String> closure(Set<String> X, List<FunctionalDependency> fds) {
         Set<String> closure = new HashSet<>(X);
         boolean changed = true;
-        while (changed) {
+        while(changed) {
             changed = false;
-            for (FunctionalDependency fd : fds) {
+            for(FunctionalDependency fd : fds) {
                 if (closure.containsAll(fd.lhs) && !closure.containsAll(fd.rhs)) {
                     closure.addAll(fd.rhs);
                     changed = true;
@@ -145,28 +143,27 @@ public class NormalizationTool {
         return closure;
     }
 
-    // Find candidate keys by checking closures of all subsets
+    // Find candidate keys
     static Set<Set<String>> findCandidateKeys(List<String> attributes, List<FunctionalDependency> fds) {
         Set<Set<String>> candidateKeys = new HashSet<>();
         List<String> attrs = new ArrayList<>(attributes);
-        // Check subsets of increasing size
         for (int r = 1; r <= attrs.size(); r++) {
             List<List<String>> combos = combinations(attrs, r);
             for (List<String> combo : combos) {
                 Set<String> subset = new HashSet<>(combo);
                 Set<String> c = closure(subset, fds);
-                if (c.containsAll(attributes)) {
+                if(c.containsAll(attributes)) {
                     // Check minimality
                     boolean minimal = true;
                     for (String att : subset) {
                         Set<String> subMinus = new HashSet<>(subset);
                         subMinus.remove(att);
-                        if (!subMinus.isEmpty() && closure(subMinus, fds).containsAll(attributes)) {
+                        if(!subMinus.isEmpty() && closure(subMinus, fds).containsAll(attributes)) {
                             minimal = false;
                             break;
                         }
                     }
-                    if (minimal) {
+                    if(minimal) {
                         candidateKeys.add(subset);
                     }
                 }
@@ -183,20 +180,19 @@ public class NormalizationTool {
     }
 
     static void combinationsHelper(List<String> list, int r, int start, List<String> current, List<List<String>> result) {
-        if (current.size() == r) {
+        if(current.size() == r) {
             result.add(new ArrayList<>(current));
             return;
         }
         for (int i = start; i < list.size(); i++) {
             current.add(list.get(i));
             combinationsHelper(list, r, i + 1, current, result);
-            current.remove(current.size() - 1);
+            current.remove(current.size()-1);
         }
     }
 
     static boolean isSuperkey(Set<String> X, List<String> attributes, List<FunctionalDependency> fds) {
-        Set<String> c = closure(X, fds);
-        return c.containsAll(attributes);
+        return closure(X, fds).containsAll(attributes);
     }
 
     static Set<String> primeAttributes(Set<Set<String>> candidateKeys) {
@@ -208,24 +204,21 @@ public class NormalizationTool {
     }
 
     // Check normal forms
-    // BCNF: For every FD X->Y, X must be a superkey.
     static boolean checkBCNF(List<String> attributes, List<FunctionalDependency> fds, Set<Set<String>> candidateKeys) {
         for (FunctionalDependency fd : fds) {
-            if (!isSuperkey(fd.lhs, attributes, fds)) {
+            if(!isSuperkey(fd.lhs, attributes, fds)) {
                 return false;
             }
         }
         return true;
     }
 
-    // 3NF: For every FD X->Y, either X is a superkey or every attribute in Y is prime
     static boolean check3NF(List<String> attributes, List<FunctionalDependency> fds, Set<Set<String>> candidateKeys) {
         Set<String> prime = primeAttributes(candidateKeys);
         for (FunctionalDependency fd : fds) {
-            if (!isSuperkey(fd.lhs, attributes, fds)) {
-                // Not a superkey, so check if all RHS are prime
-                for (String att : fd.rhs) {
-                    if (!prime.contains(att)) {
+            if(!isSuperkey(fd.lhs, attributes, fds)) {
+                for(String att : fd.rhs) {
+                    if(!prime.contains(att)) {
                         return false;
                     }
                 }
@@ -234,18 +227,14 @@ public class NormalizationTool {
         return true;
     }
 
-    // 2NF: No partial dependency of a non-prime attribute on a part of any candidate key.
-    // For each FD X->Y, if X is a proper subset of a candidate key and Y contains a non-prime attribute, it's a violation.
     static boolean check2NF(List<String> attributes, List<FunctionalDependency> fds, Set<Set<String>> candidateKeys) {
         Set<String> prime = primeAttributes(candidateKeys);
-
         for (FunctionalDependency fd : fds) {
             for (Set<String> ck : candidateKeys) {
-                if (ck.size() > 1 && ck.containsAll(fd.lhs) && !fd.lhs.containsAll(ck)) {
-                    // LHS is a proper subset of a candidate key.
-                    // Check if RHS has non-prime attributes:
+                if(ck.size() > 1 && ck.containsAll(fd.lhs) && !fd.lhs.containsAll(ck)) {
+                    // LHS is a proper subset of a candidate key
                     for (String att : fd.rhs) {
-                        if (!prime.contains(att)) {
+                        if(!prime.contains(att)) {
                             return false;
                         }
                     }
@@ -256,7 +245,6 @@ public class NormalizationTool {
     }
 
     static String determineNormalForm(List<String> attributes, List<FunctionalDependency> fds, Set<Set<String>> candidateKeys) {
-        // Already in 1NF by default assumption
         if (checkBCNF(attributes, fds, candidateKeys)) {
             return "BCNF";
         }
@@ -269,44 +257,37 @@ public class NormalizationTool {
         return "1NF";
     }
 
-    // Minimal cover:
-    // Steps:
-    // 1. Make sure each FD has a single attribute on RHS.
-    // 2. Remove extraneous attributes from LHS.
-    // 3. Remove redundant FDs.
+    // Minimal cover
     static List<FunctionalDependency> minimalCover(List<FunctionalDependency> fds) {
-        // Step 1: Decompose RHS so that each FD has a single attribute on RHS
-        List<FunctionalDependency> decomposed = new ArrayList<>();
-        for (FunctionalDependency fd : fds) {
-            for (String rhsAttr : fd.rhs) {
-                decomposed.add(new FunctionalDependency(new HashSet<>(fd.lhs), setOf(rhsAttr)));
-            }
-        }
-
-        // Step 2: Remove extraneous attributes from LHS
-        List<FunctionalDependency> afterExtraneousRemoval = removeExtraneousLeftAttributes(decomposed);
-
-        // Step 3: Remove redundant FDs
-        List<FunctionalDependency> minimal = removeRedundantFDs(afterExtraneousRemoval);
-
+        List<FunctionalDependency> decomposed = decomposeRHS(fds);
+        List<FunctionalDependency> noExtraneous = removeExtraneousLeftAttributes(decomposed);
+        List<FunctionalDependency> minimal = removeRedundantFDs(noExtraneous);
         return minimal;
     }
 
-    private static List<FunctionalDependency> removeExtraneousLeftAttributes(List<FunctionalDependency> fds) {
+    static List<FunctionalDependency> decomposeRHS(List<FunctionalDependency> fds) {
+        List<FunctionalDependency> result = new ArrayList<>();
+        for (FunctionalDependency fd : fds) {
+            for (String r : fd.rhs) {
+                result.add(new FunctionalDependency(new HashSet<>(fd.lhs), setOf(r)));
+            }
+        }
+        return result;
+    }
+
+    static List<FunctionalDependency> removeExtraneousLeftAttributes(List<FunctionalDependency> fds) {
         List<FunctionalDependency> result = new ArrayList<>(fds);
-        // For each FD X -> A, if there is an attribute 'b' in X such that (X - b)+ still determines A, remove b.
         boolean changed = true;
-        while (changed) {
+        while(changed) {
             changed = false;
             List<FunctionalDependency> newFDs = new ArrayList<>();
-            for (FunctionalDependency fd : result) {
+            for(FunctionalDependency fd : result) {
                 Set<String> X = new HashSet<>(fd.lhs);
                 for (String attr : new HashSet<>(X)) {
                     Set<String> Xminus = new HashSet<>(X);
                     Xminus.remove(attr);
-                    if (!Xminus.isEmpty()) {
-                        // Check closure of Xminus w.r.t current FDs (excluding fd itself to avoid trivial inclusion)
-                        if (closure(Xminus, result).containsAll(fd.rhs)) {
+                    if(!Xminus.isEmpty()) {
+                        if(closure(Xminus, resultWithoutFD(result, fd)).containsAll(fd.rhs)) {
                             X.remove(attr);
                             changed = true;
                         }
@@ -319,18 +300,15 @@ public class NormalizationTool {
         return result;
     }
 
-    private static List<FunctionalDependency> removeRedundantFDs(List<FunctionalDependency> fds) {
+    static List<FunctionalDependency> removeRedundantFDs(List<FunctionalDependency> fds) {
         List<FunctionalDependency> result = new ArrayList<>(fds);
         boolean changed = true;
-        while (changed) {
+        while(changed) {
             changed = false;
-            // Try removing each FD and see if the closure still determines that FD's RHS
             for (int i = 0; i < result.size(); i++) {
                 FunctionalDependency fd = result.get(i);
-                List<FunctionalDependency> testSet = new ArrayList<>(result);
-                testSet.remove(i);
-                if (closure(fd.lhs, testSet).containsAll(fd.rhs)) {
-                    // Redundant FD
+                List<FunctionalDependency> testSet = resultWithoutFD(result, fd);
+                if(closure(fd.lhs, testSet).containsAll(fd.rhs)) {
                     result.remove(i);
                     changed = true;
                     break;
@@ -340,102 +318,138 @@ public class NormalizationTool {
         return result;
     }
 
-    // Decompose to 3NF using the minimal cover:
-    // 1. Compute minimal cover.
-    // 2. For each FD in minimal cover X->A, create a relation with attributes X ∪ {A}.
-    // 3. If any attribute not included, add it as well.
+    static List<FunctionalDependency> resultWithoutFD(List<FunctionalDependency> fds, FunctionalDependency fd) {
+        List<FunctionalDependency> res = new ArrayList<>(fds);
+        res.remove(fd);
+        return res;
+    }
+
     static List<Relation> decomposeTo3NF(List<String> attributes, List<FunctionalDependency> fds) {
         List<FunctionalDependency> minimal = minimalCover(fds);
 
-        // Initially, create one relation per FD: R(X∪Y)
-        List<Relation> initialRelations = new ArrayList<>();
+        // Start by creating one relation per FD
+        List<Relation> relations = new ArrayList<>();
         for (FunctionalDependency fd : minimal) {
             Set<String> relAttrs = new HashSet<>(fd.lhs);
             relAttrs.addAll(fd.rhs);
-            List<FunctionalDependency> singleFDList = new ArrayList<>();
-            singleFDList.add(fd);
-            initialRelations.add(new Relation(relAttrs, singleFDList));
+            relations.add(new Relation(relAttrs, new ArrayList<>(Arrays.asList(fd))));
         }
 
-        // Try to merge relations if they share the same LHS or if one is a subset of another.
-        // The goal: minimal number of relations without unnecessary attributes.
+        // Remove redundant relations if any
+        removeRedundantRelations(relations, minimal);
+
+        // Now attempt merging to achieve desired minimal forms
+        // We'll repeatedly try to merge pairs of relations if it doesn't break 3NF or lose dependencies.
+        mergeRelationsToReduce(relations, minimal, attributes);
+
+        return relations;
+    }
+
+    static void removeRedundantRelations(List<Relation> relations, List<FunctionalDependency> globalFDs) {
         boolean changed = true;
         while (changed) {
             changed = false;
-
-            // Attempt merges of relations with identical LHS sets:
-            // This is a more conservative merge than before. We'll merge only if
-            // it doesn't introduce unnecessary attributes.
-            // Instead of grouping by LHS blindly, we check if merging reduces redundancy.
-            Map<Set<String>, List<Relation>> byLHS = new HashMap<>();
-            for (Relation r : initialRelations) {
-                // Compute minimal key for each relation or just store LHS sets of all FDs in it
-                Set<String> lhsSet = new HashSet<>();
-                for (FunctionalDependency fd : r.fds) {
-                    lhsSet.addAll(fd.lhs);
-                }
-                byLHS.computeIfAbsent(lhsSet, k -> new ArrayList<>()).add(r);
-            }
-
-            // Merge only if beneficial
-            for (Map.Entry<Set<String>, List<Relation>> entry : byLHS.entrySet()) {
-                List<Relation> group = entry.getValue();
-                if (group.size() > 1) {
-                    // Merge all these relations into one
-                    Set<String> mergedAttrs = new HashSet<>();
-                    List<FunctionalDependency> mergedFDs = new ArrayList<>();
-                    for (Relation r : group) {
-                        mergedAttrs.addAll(r.attributes);
-                        mergedFDs.addAll(r.fds);
-                    }
-
-                    // Replace them with a single merged relation
-                    initialRelations.removeAll(group);
-                    initialRelations.add(new Relation(mergedAttrs, mergedFDs));
-                    changed = true;
-                    break;
-                }
-            }
-
-            if (!changed) {
-                // Check if any relation is a subset of another and can be removed
-                outer:
-                for (int i = 0; i < initialRelations.size(); i++) {
-                    Relation r1 = initialRelations.get(i);
-                    for (int j = 0; j < initialRelations.size(); j++) {
-                        if (i == j) continue;
-                        Relation r2 = initialRelations.get(j);
-                        // If r1 is a subset of r2 (attributes of r1 included in r2)
-                        // and r2's FDs include r1's FDs, we can remove r1
-                        if (r2.attributes.containsAll(r1.attributes)) {
-                            // Check if all FDs in r1 are preserved by r2's attributes:
-                            if (fdsPreserved(r1.fds, r2.attributes, minimal)) {
-                                initialRelations.remove(i);
-                                changed = true;
-                                break outer;
-                            }
+            for (int i = 0; i < relations.size(); i++) {
+                Relation r1 = relations.get(i);
+                for (int j = 0; j < relations.size(); j++) {
+                    if (i == j) continue;
+                    Relation r2 = relations.get(j);
+                    if (r2.attributes.containsAll(r1.attributes)) {
+                        if (fdsPreserved(r1.fds, r2.attributes, globalFDs)) {
+                            relations.remove(i);
+                            changed = true;
+                            break;
                         }
                     }
                 }
+                if (changed) break;
             }
         }
-
-        return initialRelations;
     }
 
-    // Check if all given FDs are preserved by the attributes of a given relation
     static boolean fdsPreserved(List<FunctionalDependency> fdsToCheck, Set<String> relationAttrs, List<FunctionalDependency> globalFDs) {
-        // For FD X->Y to hold in relationAttrs, (X)+ within the restricted FDs that apply to relationAttrs should include Y.
-        // Restrict globalFDs to those whose attributes are subset of relationAttrs:
         List<FunctionalDependency> restrictedFDs = globalFDs.stream()
                 .filter(fd -> relationAttrs.containsAll(fd.lhs) && relationAttrs.containsAll(fd.rhs))
                 .collect(Collectors.toList());
 
         for (FunctionalDependency fd : fdsToCheck) {
-            Set<String> closureSet = closure(fd.lhs, restrictedFDs);
-            if (!closureSet.containsAll(fd.rhs)) return false;
+            Set<String> c = closure(fd.lhs, restrictedFDs);
+            if (!c.containsAll(fd.rhs)) return false;
         }
         return true;
     }
 
+    // Attempt merging relations:
+    // We try pairwise merges if:
+    // - The merged set of FDs still forms a 3NF relation.
+    // - No dependencies are lost.
+    // This allows creating larger relations, closer to your desired output.
+    static void mergeRelationsToReduce(List<Relation> relations, List<FunctionalDependency> globalFDs, List<String> allAttributes) {
+        boolean changed = true;
+        while (changed) {
+            changed = false;
+            outer:
+            for (int i = 0; i < relations.size(); i++) {
+                for (int j = i+1; j < relations.size(); j++) {
+                    Relation r1 = relations.get(i);
+                    Relation r2 = relations.get(j);
+                    Relation merged = attemptMerge(r1, r2, globalFDs, allAttributes);
+                    if (merged != null) {
+                        // Merge successful
+                        relations.remove(j);
+                        relations.remove(i);
+                        relations.add(merged);
+                        changed = true;
+                        break outer;
+                    }
+                }
+            }
+        }
+    }
+
+    // Attempt to merge two relations r1 and r2
+    static Relation attemptMerge(Relation r1, Relation r2, List<FunctionalDependency> globalFDs, List<String> allAttributes) {
+        Set<String> mergedAttrs = new HashSet<>(r1.attributes);
+        mergedAttrs.addAll(r2.attributes);
+
+        List<FunctionalDependency> mergedFDs = new ArrayList<>(r1.fds);
+        mergedFDs.addAll(r2.fds);
+
+        // Check if merging preserves dependencies of these two sets and remains in 3NF
+        // Since we want to ensure no FD lost: all FDs in r1 and r2 must be preserved by merged
+        if (!fdsPreserved(r1.fds, mergedAttrs, globalFDs)) return null;
+        if (!fdsPreserved(r2.fds, mergedAttrs, globalFDs)) return null;
+
+        // Check 3NF for the merged relation
+        // We only need to check 3NF of the mergedFDs within mergedAttrs
+        if (!is3NFRelation(mergedAttrs, mergedFDs, globalFDs, allAttributes)) return null;
+
+        return new Relation(mergedAttrs, mergedFDs);
+    }
+
+    static boolean is3NFRelation(Set<String> attrs, List<FunctionalDependency> fds, List<FunctionalDependency> globalFDs, List<String> allAttributes) {
+        // Candidate keys for the sub-relation might differ, but let's approximate:
+        // For checking 3NF: For each FD in fds, either LHS is a superkey of attrs or RHS are prime attributes.
+        // Compute candidate keys restricted to these attributes and FDs:
+        List<FunctionalDependency> restrictedFDs = fds.stream()
+                .filter(fd -> attrs.containsAll(fd.lhs) && attrs.containsAll(fd.rhs))
+                .collect(Collectors.toList());
+
+        Set<Set<String>> candidateKeysSub = findCandidateKeys(new ArrayList<>(attrs), restrictedFDs);
+        if (candidateKeysSub.isEmpty()) {
+            // If no candidate key found (odd case), treat as not 3NF
+            return false;
+        }
+
+        Set<String> prime = primeAttributes(candidateKeysSub);
+        for (FunctionalDependency fd : fds) {
+            if (!isSuperkey(fd.lhs, new ArrayList<>(attrs), restrictedFDs)) {
+                for (String att : fd.rhs) {
+                    if (!prime.contains(att)) return false;
+                }
+            }
+        }
+        return true;
+    }
+    
 }
