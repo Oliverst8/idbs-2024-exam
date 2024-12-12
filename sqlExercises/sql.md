@@ -691,14 +691,10 @@ How many different people have bought games that they have not played?
 ### Part 1
 
 ```sql
-  SELECT COUNT(*)
-  FROM (
-    SELECT DISTINCT(p.PID)
-    FROM Person p
-    JOIN Buys b ON p.PID = b.PID
-    LEFT JOIN Plays pl ON p.PID = pl.PID AND pl.GID = b.GID
-    WHERE pl.PID IS NULL
-  );
+SELECT COUNT(DISTINCT b.pid)
+FROM Buys b
+LEFT JOIN Plays p ON b.pid = p.pid AND b.gid = p.gid
+WHERE p.pid IS null;
 ```
 
 ## 13
