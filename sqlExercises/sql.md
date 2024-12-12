@@ -704,7 +704,22 @@ How many people have played more games than they have bought?
 ### Part 1
 
 ```sql
+SELECT COUNT(*)
 
+FROM (
+	SELECT PID
+	
+	FROM Plays
+	
+	GROUP BY PID
+	HAVING COUNT(GID) > (
+		SELECT COUNT(GID)
+	
+		FROM Buys
+	
+		WHERE PID = Plays.PID
+	)
+)
 ```
 
 ## 15
