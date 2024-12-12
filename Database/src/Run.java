@@ -5,7 +5,7 @@ import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class NormalizationTool {
+public class Run {
 
     public static void main(String[] args) throws IOException, UnsupportedFlavorException {
         try {
