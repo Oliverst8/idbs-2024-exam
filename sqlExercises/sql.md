@@ -683,10 +683,7 @@ from (
 
 # Exam 2024
 
-## 11
-
-100 different people have bought games that they have played.
-How many different people have bought games that they have not played?
+## 11 - 100 different people have bought games that they have played. How many different people have bought games that they have not played?
 
 ### Part 1
 
@@ -697,9 +694,7 @@ LEFT JOIN Plays p ON b.pid = p.pid AND b.gid = p.gid
 WHERE p.pid IS null;
 ```
 
-## 13
-
-How many people have played more games than they have bought?
+## 13 - How many people have played more games than they have bought?
 
 ### Part 1
 
@@ -722,9 +717,7 @@ FROM (
 )
 ```
 
-## 15
-
-There are 507 different people who have bought a game from a country that has a population of more than 20,000,000 people. How many different people have bought a game from a country that has a population of more than 30,000,000 people?
+## 15 - There are 507 different people who have bought a game from a country that has a population of more than 20,000,000 people. How many different people have bought a game from a country that has a population of more than 30,000,000 people?
 
 ### Part 1
 
@@ -738,9 +731,7 @@ There are 507 different people who have bought a game from a country that has a 
   WHERE c.population > 30000000;
 ```
 
-## 17
-
-There are 37 people who have bought some game from all developer companies that were founded in 1969. How many people have bought some game from all developer companies that were founded in 1960?
+## 17 - There are 37 people who have bought some game from all developer companies that were founded in 1969. How many people have bought some game from all developer companies that were founded in 1960?
 
 ### Part 1
 
