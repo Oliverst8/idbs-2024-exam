@@ -1,35 +1,93 @@
+import java.awt.*;
+import java.awt.datatransfer.*;
+import java.io.IOException;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class NormalizationTool {
 
-    public static void main(String[] args) {
-        // Example:
-        // Relation: (A, B, C, D, E)
-        // FDs:
-        // AB -> C
-        // C -> D
-        // E -> D
-        // D -> A
+    public static void main(String[] args) throws IOException, UnsupportedFlavorException {
+        try {
 
-        // In a real application, read from input.
-        List<String> attributes = Arrays.asList("W", "X", "Y", "Z", "V");
-        List<FunctionalDependency> fds = new ArrayList<>();
-        fds.add(new FunctionalDependency(setOf("W","X"), setOf("Y","Z","V")));
-        fds.add(new FunctionalDependency(setOf("Z"), setOf("X","Y")));
-        fds.add(new FunctionalDependency(setOf("Y"), setOf("V")));
+            // Example:
+            // Relation: (A, B, C, D, E)
+            // FDs:
+            // AB -> C
+            // C -> D
+            // E -> D
+            // D -> A
 
-        Set<Set<String>> candidateKeys = findCandidateKeys(attributes, fds);
-        String normalForm = determineNormalForm(attributes, fds, candidateKeys);
+            // In a real application, read from input.
+//        List<String> attributes = Arrays.asList("W", "X", "Y", "Z", "V");
+//        List<FunctionalDependency> fds = new ArrayList<>();
+//        fds.add(new FunctionalDependency(setOf("W","X"), setOf("Y","Z","V")));
+//        fds.add(new FunctionalDependency(setOf("Z"), setOf("X","Y")));
+//        fds.add(new FunctionalDependency(setOf("Y"), setOf("V")));
 
-        System.out.println("Current normal form: " + normalForm);
+            List<String> attributes = new ArrayList<>();
+            List<FunctionalDependency> fds = new ArrayList<>();
+            StringBuilder output = new StringBuilder();
 
-        if (!normalForm.equals("BCNF") && !normalForm.equals("3NF")) {
-            List<Relation> decomposition = decomposeTo3NF(attributes, fds);
-            System.out.println("Decomposition to 3NF:");
-            for (Relation r : decomposition) {
-                System.out.println(r);
+            // Get the clipboard
+            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+
+            // Get the clipboard content
+            Transferable content = clipboard.getContents(null);
+
+            // Check if the clipboard contains a string
+            if (content != null && content.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+                String clipboardText = (String) content.getTransferData(DataFlavor.stringFlavor);
+                List<String> lines = new ArrayList<>(Arrays.asList(clipboardText.split("\n")));
+
+                Collections.addAll(attributes, lines.get(0).split(","));
+                lines.remove(0);
+
+                for (var line : lines) {
+                    var parts = line.split("→");
+                    var lhs = parts[0].trim().split(",");
+                    var rhs = parts[1].trim().split(",");
+                    if (lhs.length == 1 && !attributes.contains(lhs[0])) {
+                        lhs = parts[0].trim().split("");
+                    }
+                    if (rhs.length == 1 && !attributes.contains(rhs[0])) {
+                        rhs = parts[1].trim().split("");
+                    }
+                    fds.add(new FunctionalDependency(new HashSet<>(Arrays.asList(lhs)), new HashSet<>(Arrays.asList(rhs))));
+                }
+            } else {
+                System.exit(0);
             }
+
+
+            Set<Set<String>> candidateKeys = findCandidateKeys(attributes, fds);
+            String normalForm = determineNormalForm(attributes, fds, candidateKeys);
+
+//        System.out.println("Current normal form: " + normalForm);
+//        System.out.println("Candidate keys: ");
+            output.append("Was: ").append(normalForm).append("\n");
+            output.append("Candidate keys: \n");
+            for (Set<String> ck : candidateKeys) {
+//            System.out.print(ck);
+                output.append(ck);
+            }
+//        System.out.println();
+            output.append("\n");
+
+            if (!normalForm.equals("BCNF") && !normalForm.equals("3NF")) {
+                List<Relation> decomposition = decomposeTo3NF(attributes, fds);
+//            System.out.println("Decomposition to 3NF:");
+                output.append("To 3NF:\n");
+                for (Relation r : decomposition) {
+//                System.out.println(r);
+                    output.append(r).append("\n");
+                }
+            }
+            // Set the clipboard content
+            StringSelection stringSelection = new StringSelection(output.toString());
+            clipboard.setContents(stringSelection, null);
+        } catch (Exception e) {
+            System.exit(0);
         }
     }
 
@@ -67,7 +125,7 @@ public class NormalizationTool {
         public String toString() {
             String atts = attributes.stream().sorted().collect(Collectors.joining(", "));
             String fdeps = fds.stream().map(FunctionalDependency::toString).collect(Collectors.joining("; "));
-            return "R(" + atts + ") with FDs: " + fdeps;
+            return "R(" + atts + ") FDs: " + fdeps;
         }
     }
 
