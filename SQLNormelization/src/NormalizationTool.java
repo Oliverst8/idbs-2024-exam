@@ -347,37 +347,95 @@ public class NormalizationTool {
     static List<Relation> decomposeTo3NF(List<String> attributes, List<FunctionalDependency> fds) {
         List<FunctionalDependency> minimal = minimalCover(fds);
 
-        // Group by left hand side to form relations
-        Map<Set<String>, Set<String>> map = new HashMap<>();
+        // Initially, create one relation per FD: R(X∪Y)
+        List<Relation> initialRelations = new ArrayList<>();
         for (FunctionalDependency fd : minimal) {
-            map.putIfAbsent(fd.lhs, new HashSet<>());
-            map.get(fd.lhs).addAll(fd.rhs);
+            Set<String> relAttrs = new HashSet<>(fd.lhs);
+            relAttrs.addAll(fd.rhs);
+            List<FunctionalDependency> singleFDList = new ArrayList<>();
+            singleFDList.add(fd);
+            initialRelations.add(new Relation(relAttrs, singleFDList));
         }
 
-        Set<String> used = new HashSet<>();
-        List<Relation> relations = new ArrayList<>();
+        // Try to merge relations if they share the same LHS or if one is a subset of another.
+        // The goal: minimal number of relations without unnecessary attributes.
+        boolean changed = true;
+        while (changed) {
+            changed = false;
 
-        for (Map.Entry<Set<String>, Set<String>> entry : map.entrySet()) {
-            Set<String> relAttrs = new HashSet<>(entry.getKey());
-            relAttrs.addAll(entry.getValue());
+            // Attempt merges of relations with identical LHS sets:
+            // This is a more conservative merge than before. We'll merge only if
+            // it doesn't introduce unnecessary attributes.
+            // Instead of grouping by LHS blindly, we check if merging reduces redundancy.
+            Map<Set<String>, List<Relation>> byLHS = new HashMap<>();
+            for (Relation r : initialRelations) {
+                // Compute minimal key for each relation or just store LHS sets of all FDs in it
+                Set<String> lhsSet = new HashSet<>();
+                for (FunctionalDependency fd : r.fds) {
+                    lhsSet.addAll(fd.lhs);
+                }
+                byLHS.computeIfAbsent(lhsSet, k -> new ArrayList<>()).add(r);
+            }
 
-            // Find FDs that hold fully within this set of attributes
-            List<FunctionalDependency> relFDs = minimal.stream()
-                    .filter(mfd -> relAttrs.containsAll(mfd.lhs) && relAttrs.containsAll(mfd.rhs))
-                    .collect(Collectors.toList());
+            // Merge only if beneficial
+            for (Map.Entry<Set<String>, List<Relation>> entry : byLHS.entrySet()) {
+                List<Relation> group = entry.getValue();
+                if (group.size() > 1) {
+                    // Merge all these relations into one
+                    Set<String> mergedAttrs = new HashSet<>();
+                    List<FunctionalDependency> mergedFDs = new ArrayList<>();
+                    for (Relation r : group) {
+                        mergedAttrs.addAll(r.attributes);
+                        mergedFDs.addAll(r.fds);
+                    }
 
-            relations.add(new Relation(relAttrs, relFDs));
-            used.addAll(relAttrs);
+                    // Replace them with a single merged relation
+                    initialRelations.removeAll(group);
+                    initialRelations.add(new Relation(mergedAttrs, mergedFDs));
+                    changed = true;
+                    break;
+                }
+            }
+
+            if (!changed) {
+                // Check if any relation is a subset of another and can be removed
+                outer:
+                for (int i = 0; i < initialRelations.size(); i++) {
+                    Relation r1 = initialRelations.get(i);
+                    for (int j = 0; j < initialRelations.size(); j++) {
+                        if (i == j) continue;
+                        Relation r2 = initialRelations.get(j);
+                        // If r1 is a subset of r2 (attributes of r1 included in r2)
+                        // and r2's FDs include r1's FDs, we can remove r1
+                        if (r2.attributes.containsAll(r1.attributes)) {
+                            // Check if all FDs in r1 are preserved by r2's attributes:
+                            if (fdsPreserved(r1.fds, r2.attributes, minimal)) {
+                                initialRelations.remove(i);
+                                changed = true;
+                                break outer;
+                            }
+                        }
+                    }
+                }
+            }
         }
 
-        // If there are attributes not covered, add them as a separate relation
-        Set<String> leftover = new HashSet<>(attributes);
-        leftover.removeAll(used);
-        if (!leftover.isEmpty()) {
-            relations.add(new Relation(leftover, new ArrayList<>()));
-        }
+        return initialRelations;
+    }
 
-        return relations;
+    // Check if all given FDs are preserved by the attributes of a given relation
+    static boolean fdsPreserved(List<FunctionalDependency> fdsToCheck, Set<String> relationAttrs, List<FunctionalDependency> globalFDs) {
+        // For FD X->Y to hold in relationAttrs, (X)+ within the restricted FDs that apply to relationAttrs should include Y.
+        // Restrict globalFDs to those whose attributes are subset of relationAttrs:
+        List<FunctionalDependency> restrictedFDs = globalFDs.stream()
+                .filter(fd -> relationAttrs.containsAll(fd.lhs) && relationAttrs.containsAll(fd.rhs))
+                .collect(Collectors.toList());
+
+        for (FunctionalDependency fd : fdsToCheck) {
+            Set<String> closureSet = closure(fd.lhs, restrictedFDs);
+            if (!closureSet.containsAll(fd.rhs)) return false;
+        }
+        return true;
     }
 
 }
